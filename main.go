@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"fmt"
 )
 
@@ -31,7 +32,6 @@ type Food struct {
 }
 
 // policy
-// 2. Generate a random food inside Field
 // 3. Initialize a snake on the Field
 // 4. Moving the snake
 // 5. Specifying game over situation
@@ -39,8 +39,16 @@ type Food struct {
 func main() {
 	// 1. Generating the Field
 	field := New(Width, Height)
-	field.GenerateBorder()
+	field.GenerateWorld()
+	
+	// 2. Generate a random food inside Field
+	field.CreateFood()
 	field.Draw()
+
+	// core engin of the program
+	for {
+		
+	}
 
 }
 
@@ -63,7 +71,7 @@ func New(width, height int) *Field {
 	return &field
 }
 
-func (f *Field) GenerateBorder() {
+func (f *Field) GenerateWorld() {
 	for i := 0; i < f.height; i++ {
 		for j := 0; j < f.width; j++ {
 			if i == 0 || i == f.height-1 || j == 0 || j == f.width-1 {
@@ -77,10 +85,20 @@ func (f *Field) GenerateBorder() {
 
 func (f *Field) Draw() {
 	for _, row := range f.world {
-		// if i == 0 || i == f.height-1 {
-		// 	s := strings.Join(row, "")
-		// 	fmt.Printf("%s\n", s)
-		// }
 		fmt.Println(row)
 	}
+}
+
+func (f *Field) UpdateWorld(food *Food) {
+	f.world[food.x][food.y] = "O"
+}
+
+// ----------------------------------------------------------------------------
+// Create Food
+func (f *Field) CreateFood() {
+	food := Food {
+		x: rand.Intn(Width-2)+1,
+		y: rand.Intn(Height-2)+1,
+	}
+	f.UpdateWorld(&food)
 }
