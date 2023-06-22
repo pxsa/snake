@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -25,7 +26,6 @@ type Field struct {
 type part struct {
 	x int
 	y int
-	value string
 }
 
 // snake
@@ -34,11 +34,6 @@ type Snake struct {
 	headX int
 	headY int
 	body []*part
-}
-
-// food
-type Food struct {
-	x,y int
 }
 
 // policy
@@ -63,7 +58,10 @@ func main() {
 		
 		field.Draw()
 		os.Stdin.Read(input)
-		snake.Move(string(input), field)
+		if !snake.Move(string(input), field) {
+			log.Println("Game Over")
+			return
+		}
 	}
 
 }
@@ -114,13 +112,15 @@ func (f *Field) Draw() {
 func (f *Field) UpdateWorld(row, col int, kind string) {
 	switch kind {
 	case "food":
-		f.world[col][row] = "O"
-	case "snake":
-		f.world[col][row] = "+"
+		f.world[row][col] = "o"
+	case "snake-body":
+		f.world[row][col] = "+"
 	case "snake-head":
-		f.world[col][row] = "*"
+		f.world[row][col] = "*"
+	case "default":
+		f.world[row][col] = " "
 	default:
-		f.world[col][row] = " "
+		f.world[row][col] = " "
 	}
 }
 
@@ -143,7 +143,7 @@ func (f *Field) CreateFood() {
 		y = rand.Intn(Height-2)+1
 	}
 
-	f.UpdateWorld(x, y, "food")
+	f.UpdateWorld(y, x, "food")
 }
 
 // ----------------------------------------------------------------------------
@@ -155,10 +155,9 @@ func (field *Field) InitSnake() *Snake{
 		headX: x,
 		headY: y,
 		length: 1,
-		body: []*part{},
 	}
-	snake.body = append(snake.body, &part{x, y, "*"})
-	field.UpdateWorld(x, y, "snake-head")
+	snake.body = append(snake.body, &part{x, y})
+	field.UpdateWorld(y, x, "snake-head")
 
 	return snake
 }
@@ -197,14 +196,40 @@ func (s *Snake) Move(input string, field *Field) bool{
 	}
 
 	// Move to the next place
-	s.headX = i
-	s.headY = j
-	temp := s.body[0]
-	field.UpdateWorld(temp.x, temp.y, "default")
-
-	s.body[0].x = s.headX
-	s.body[0].y = s.headY
-	field.UpdateWorld(s.headX, s.headY, "snake-head")
+	s.headX   = i
+	s.headY   = j
+	lastPart := s.body[s.length-1]
 	
+	for index := s.length-2; index >= 0; index-- {
+		s.body[index+1] = s.body[index]
+	}
+	
+	newPart  := part {x: s.headX, y: s.headY}
+	s.body[0] = &newPart
+
+	// Check whether the next place is food or not
+	if field.world[s.headY][s.headX] == "o" {
+		s.body = append(s.body, lastPart)
+		s.length++
+		field.CreateFood()
+	} else {
+		// lastPart = nil
+		field.UpdateWorld(lastPart.y, lastPart.x, "default")
+	}
+
+	field.UpdateWholdWorld(s)
 	return true
+}
+
+func(f *Field) UpdateWholdWorld(snake *Snake) {
+	var row, col int
+	for index, part := range snake.body {
+		row = part.y
+		col = part.x
+		if index == 0 {
+			f.UpdateWorld(row, col, "snake-head")
+			break
+		}
+		f.UpdateWorld(row, col, "snake-body")
+	}
 }
