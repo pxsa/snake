@@ -20,6 +20,7 @@ type Field struct {
 	width int
 	height int
 	world [][]string
+	score int
 }
 
 // part
@@ -104,6 +105,8 @@ func (f *Field) GenerateWorld() {
 
 func (f *Field) Draw() {
 	f.ClearWorld()
+	fmt.Println("Snake Game")
+	fmt.Printf("score: %d\n", f.score)
 	for _, row := range f.world {
 		fmt.Println(row)
 	}
@@ -212,6 +215,7 @@ func (s *Snake) Move(input string, field *Field) bool{
 		s.body = append(s.body, lastPart)
 		s.length++
 		field.CreateFood()
+		field.score++
 	} else {
 		// lastPart = nil
 		field.UpdateWorld(lastPart.y, lastPart.x, "default")
