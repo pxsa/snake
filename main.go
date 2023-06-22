@@ -37,12 +37,10 @@ type Snake struct {
 }
 
 // policy
-// 4. Moving the snake
-// 5. Specifying game over situation
 
 func main() {
 	var input []byte = make([]byte, 1)
-
+	
 	// 1. Generating the Field
 	field := New(Width, Height)
 	field.GenerateWorld()
@@ -53,11 +51,13 @@ func main() {
 	// 3. Generate a random food inside Field
 	field.CreateFood()
 	
-	// core engin of the program
+	// core engine of the program
 	for string(input) != "q" {
 		
 		field.Draw()
 		os.Stdin.Read(input)
+		// 4. Moving the snake
+		// 5. Specifying game over situation
 		if !snake.Move(string(input), field) {
 			log.Println("Game Over")
 			return
@@ -116,7 +116,7 @@ func (f *Field) UpdateWorld(row, col int, kind string) {
 	case "snake-body":
 		f.world[row][col] = "+"
 	case "snake-head":
-		f.world[row][col] = "*"
+		f.world[row][col] = "x"
 	case "default":
 		f.world[row][col] = " "
 	default:
@@ -190,7 +190,7 @@ func (s *Snake) Move(input string, field *Field) bool{
 	}
 
 	// Validate i & j
-	if i == 0 || i == 9 || j == 0 || j == 9 {
+	if i == 0 || i == Width-1 || j == 0 || j == Height-1 {
 		// invalid i&j => lose
 		return false
 	}
@@ -228,7 +228,7 @@ func(f *Field) UpdateWholdWorld(snake *Snake) {
 		col = part.x
 		if index == 0 {
 			f.UpdateWorld(row, col, "snake-head")
-			break
+			continue
 		}
 		f.UpdateWorld(row, col, "snake-body")
 	}
