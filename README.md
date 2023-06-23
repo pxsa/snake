@@ -19,7 +19,7 @@ execute the following command in your terminal.
 
 ### Scale
 
-The default values for`width`and`height` are set to`10`, But you can change it manually to whatever you want.
+The default value for `width`and `height` is set to `10`, But you can change it manually to whatever you want.
 
 ```golang
 const (
