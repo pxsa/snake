@@ -30,6 +30,10 @@ const (
 
 ## Output
 
+<p align="center">
+
 ![trailer](./static/output.gif)
+
+</p>
 
  Have fun ;)
