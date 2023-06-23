@@ -11,8 +11,8 @@ import (
 
 // CONST
 const (
-	Width = 10
-	Height = 10
+	Width = 5
+	Height = 5
 )
 
 // field
@@ -82,6 +82,7 @@ func New(width, height int) *Field {
 	field.height = height
 	field.width = width
 	field.world = world 
+	field.score = 1
 
 	return &field
 }
@@ -105,7 +106,6 @@ func (f *Field) GenerateWorld() {
 
 func (f *Field) Draw() {
 	f.ClearWorld()
-	fmt.Println("Snake Game")
 	fmt.Printf("score: %d\n", f.score)
 	for _, row := range f.world {
 		fmt.Println(row)
@@ -133,23 +133,26 @@ func (f *Field) ClearWorld() {
 	c.Run()
 }
 
-// ----------------------------------------------------------------------------
-// Create Food
+func (f *Field) GetPixelType(row, col int) string{
+	return f.world[row][col]
+}
+
+
+// Create Food creates food for snake and placed it in a random position on the field.
 func (f *Field) CreateFood() {
 	// check for borders
-	x := rand.Intn(Width-2)+1
-	y := rand.Intn(Height-2)+1
+	var x, y int
 
-	// check for snake body
+	// check for available space
 	for f.world[x][y] != " " {
 		x = rand.Intn(Width-2)+1
 		y = rand.Intn(Height-2)+1
 	}
 
-	f.UpdateWorld(y, x, "food")
+	f.UpdateWorld(x, y, "food")
 }
 
-// ----------------------------------------------------------------------------
+
 // Snake
 func (field *Field) InitSnake() *Snake{
 	x := rand.Intn(Width-2)+1
@@ -172,29 +175,29 @@ func (s *Snake) Move(input string, field *Field) bool{
 	j := s.headY
 
 	switch input {
+
+	// Up
 	case "w":
-		// Move Up
 		j--
 
+	// Left
 	case "a":
-		// Move Left
 		i--
 
+	// Right
 	case "d":
-		// Move Right
 		i++
 
+	// Down
 	case "s":
-		// Move Down
 		j++
 
 	default:
 		// Move No-where
 	}
 
-	// Validate i & j
+	// validate i & j
 	if i == 0 || i == Width-1 || j == 0 || j == Height-1 {
-		// invalid i&j => lose
 		return false
 	}
 
@@ -211,10 +214,11 @@ func (s *Snake) Move(input string, field *Field) bool{
 	s.body[0] = &newPart
 
 	// Check whether the next place is food or not
-	if field.world[s.headY][s.headX] == "o" {
+	flag := false
+	if field.GetPixelType(s.headY, s.headX) == "o" {
 		s.body = append(s.body, lastPart)
 		s.length++
-		field.CreateFood()
+		flag = true
 		field.score++
 	} else {
 		// lastPart = nil
@@ -222,6 +226,9 @@ func (s *Snake) Move(input string, field *Field) bool{
 	}
 
 	field.UpdateWholdWorld(s)
+	if flag {
+		field.CreateFood()
+	}
 	return true
 }
 
