@@ -36,4 +36,3 @@ const (
 
 </p>
 
- Have fun ;)
